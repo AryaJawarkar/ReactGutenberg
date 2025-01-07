@@ -18,13 +18,6 @@ const BookListPage = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchBooks = useCallback(async (pageNum) => {
-    if (booksCache[pageNum]) {
-      setBooks(booksCache[pageNum].results);
-      setHasMore(booksCache[pageNum].next !== null);
-      setTotalCount(booksCache[pageNum].count);
-      return;
-    }
-
     if (loading) return;
     
     setLoading(true);
@@ -54,31 +47,29 @@ const BookListPage = () => {
               name
             )
           ),
-          books_book_bookshelves!left (
-            books_bookshelf!left (
-              name
-            )
-          ),
           books_format!left (
             mime_type,
             url
           )
-        `, { count: 'exact' });
+        `, { count: 'exact' })
+        .order('download_count', { ascending: false });
 
       if (genre) {
         query = query.filter('books_book_subjects.books_subject.name', 'ilike', `%${genre}%`);
       }
       
       if (search) {
-        query = query
-          .or(`title.ilike.%${search}%`,`books_book_authors.books_author.name.ilike.%${search}%`)
-          ;
+        query = query.or(
+          `title.ilike.%${search}%`,
+          `books_book_authors.books_author.name.ilike.%${search}%`
+        );
       }
-      console.log(query);
-      console.log(genre, search);
+
       query = query.range((pageNum - 1) * 32, pageNum * 32 - 1);
 
-      const { data: rawData, count } = await query;
+      const { data: rawData, count, error } = await query;
+
+      if (error) throw error;
 
       if (!rawData) {
         setBooks([]);
@@ -97,18 +88,6 @@ const BookListPage = () => {
             birth_year: author.books_author?.birth_year,
             death_year: author.books_author?.death_year
           })) || [],
-          translators: [],
-          subjects: book.books_book_subjects?.map(subject => 
-            subject.books_subject?.name
-          ) || [],
-          bookshelves: book.books_book_bookshelves?.map(shelf => 
-            shelf.books_bookshelf?.name
-          ) || [],
-          languages: book.books_book_languages?.map(lang => 
-            lang.books_language?.code
-          ) || [],
-          copyright: false,
-          media_type: "Text",
           formats: book.books_format?.reduce((acc, format) => {
             if (format?.mime_type && format?.url) {
               acc[format.mime_type] = format.url;
@@ -127,8 +106,8 @@ const BookListPage = () => {
       }
 
       setBooks(response.results);
-      setHasMore(response.next !== null);
-      setTotalCount(response.count);
+      setHasMore(count > pageNum * 32);
+      setTotalCount(count);
 
     } catch (error) {
       console.error('Error fetching books:', error);
@@ -183,15 +162,24 @@ const BookListPage = () => {
   }, []);
 
   const handleBookClick = async (book) => {
-    const formats = ['html', 'pdf', 'txt'];
+    // Check for viewable formats in order of preference
+    const preferredFormats = [
+      'text/html',
+      'application/pdf',
+      'text/plain; charset=utf-8',
+      'text/plain'
+    ];
     
-    for (const format of formats) {
-      if (book[`${format}_url`]) {
-        window.open(book[`${format}_url`], '_blank');
+    const formats = book.formats || {};
+    
+    for (const format of preferredFormats) {
+      if (formats[format]) {
+        window.open(formats[format], '_blank');
         return;
       }
     }
     
+    // If no viewable format is found
     alert('No viewable version available');
   };
 
@@ -229,7 +217,7 @@ const BookListPage = () => {
           Previous
         </button>
         
-        <span>
+        <span className="page-number">
           Page {page} of {Math.ceil(totalCount / 32)}
         </span>
 
