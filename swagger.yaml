@@ -1,0 +1,143 @@
+openapi: 3.0.0
+info:
+  title: Gutenberg Library Database API
+  description: Documentation for Supabase database queries used in the Gutenberg Library project
+  version: 1.0.0
+  contact:
+    email: your.email@example.com
+
+servers:
+  - url: https://your-supabase-project.supabase.co
+    description: Supabase Database
+
+paths:
+  /books/{genre}:
+    get:
+      summary: Get Books Query
+      description: |
+        Supabase query to fetch books with filtering and pagination
+        ```javascript
+        const getBooks = async ({ genre, search, page = 1, limit = 32 }) => {
+          const query = supabase
+            .from('books_book')
+            .select(`
+              gutenberg_id,
+              title,
+              download_count,
+              books_book_authors!left (
+                books_author!left (
+                  name,
+                  birth_year,
+                  death_year
+                )
+              ),
+              books_format!left (
+                mime_type,
+                url
+              )
+            `)
+            .order('download_count', { ascending: false });
+
+          if (genre) {
+            query.filter('genre', 'eq', genre.toLowerCase());
+          }
+
+          if (search) {
+            query.or(`title.ilike.%${search}%,books_book_authors.books_author.name.ilike.%${search}%`);
+          }
+
+          const start = (page - 1) * limit;
+          return query.range(start, start + limit - 1);
+        };
+        ```
+      parameters:
+        - in: query
+          name: genre
+          schema:
+            type: string
+          description: Filter books by genre
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Search in title or author name
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number for pagination
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 32
+          description: Items per page
+      responses:
+        '200':
+          description: Successful query
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookQueryResult'
+
+components:
+  schemas:
+    BookQueryResult:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
+        count:
+          type: integer
+
+    Book:
+      type: object
+      properties:
+        gutenberg_id:
+          type: integer
+        title:
+          type: string
+        download_count:
+          type: integer
+        books_book_authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookAuthor'
+        books_format:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookFormat'
+
+    BookAuthor:
+      type: object
+      properties:
+        books_author:
+          $ref: '#/components/schemas/Author'
+
+    Author:
+      type: object
+      properties:
+        name:
+          type: string
+        birth_year:
+          type: integer
+        death_year:
+          type: integer
+
+    BookFormat:
+      type: object
+      properties:
+        mime_type:
+          type: string
+          enum: ['text/plain', 'application/pdf', 'image/jpeg']
+        url:
+          type: string
+          format: uri
+
+
+tags:
+  - name: Database Queries
+    description: Supabase database queries used in the application 

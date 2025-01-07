@@ -15,5 +15,14 @@ export default defineConfig({
         manualChunks: undefined
       }
     }
+  },
+  server: {
+    proxy: {
+      '/api-docs': {
+        target: 'http://localhost:5173',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api-docs/, '')
+      }
+    }
   }
 })
