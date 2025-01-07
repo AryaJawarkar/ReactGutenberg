@@ -187,7 +187,7 @@ const BookListPage = () => {
     <div className="book-list-page">
       <div className="header-container">
         <button className="back-button" onClick={() => navigate('/')}>
-          <img src={arrowLeft} alt="arrow-left" />{genre}
+          <img src={arrowLeft} alt="arrow-left" className='arrow-left' />{genre.charAt(0).toUpperCase() + genre.slice(1)}
         </button>
         <SearchBar
           value={search}
