@@ -28,6 +28,7 @@ jobs:
         run: npm test
 
   build-and-deploy:  # This job will only run if the test job succeeds
+    needs: test
     runs-on: ubuntu-latest
     # Only deploy on push to master, not on PRs
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'

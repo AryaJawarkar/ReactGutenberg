@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../../utils/supabase';
+import { supabase } from '../utils/supabase';
 import SearchBar from '../components/SearchBar';
 import BookCard from '../components/BookCard';
 import arrowLeft from '../assets/images/Back.svg';

@@ -10,6 +10,12 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.env = {
+        VITE_SUPABASE_URL: "%VITE_SUPABASE_URL%",
+        VITE_SUPABASE_ANON_KEY: "%VITE_SUPABASE_ANON_KEY%"
+      };
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
