@@ -5,5 +5,5 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.svg'],
-  base: process.env.NODE_ENV === 'production' ? '/ReactGutenberg.git/' : '/'
+  base: process.env.NODE_ENV === 'production' ? '/ReactGutenberg/' : '/'
 })
