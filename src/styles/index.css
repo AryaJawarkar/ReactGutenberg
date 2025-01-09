@@ -53,6 +53,8 @@ body {
   justify-content: space-between;
   background: white;
   border-radius: 8px;
+  margin-bottom: .5rem;
+  width: 40%;
   box-shadow: var(--card-shadow);
   text-decoration: none;
   color: var(--text-color);

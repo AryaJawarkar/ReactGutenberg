@@ -5,11 +5,13 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.svg'],
-  base: process.env.NODE_ENV === 'production' ? '/ReactGutenberg/' : '/',
+  base: '/ReactGutenberg/',
   define: {
     'process.env': process.env
   },
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
     rollupOptions: {
       output: {
         manualChunks: undefined

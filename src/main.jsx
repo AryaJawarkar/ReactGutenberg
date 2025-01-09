@@ -4,10 +4,14 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './styles/index.css';
 
+// Handle GitHub Pages redirect
+const path = localStorage.getItem('path') || '/';
+localStorage.removeItem('path');
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
+    <BrowserRouter basename="/ReactGutenberg">
+      <App defaultPath={path} />
     </BrowserRouter>
   </React.StrictMode>
 );
