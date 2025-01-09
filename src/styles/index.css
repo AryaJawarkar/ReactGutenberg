@@ -4,7 +4,9 @@
   --card-shadow: 0 2px 4px rgba(211, 209, 238, 0.5);
   --text-color: #2D3748;
 }
-
+*{
+  box-sizing: border-box;
+}
 body {
   margin: 0;
   padding: 0;
@@ -15,6 +17,8 @@ body {
   box-sizing: border-box;
  
 }
+
+
 
 .home-page {
   width: 100%;
@@ -28,13 +32,12 @@ body {
 
 .header h1 {
   color: var(--primary-color);
-  font-size: clamp(2rem, 4vw, 2.5rem);
+  font-size: 48px;
   margin-bottom: 0.5rem;
 }
 
 .header p {
   color: #4A5568;
-  font-size: clamp(0.875rem, 2vw, 1rem);
   line-height: 1.5;
 }
 .genre-card-content {
@@ -49,7 +52,7 @@ body {
 .genre-card {
   display: flex;
   align-items: center;
-  padding: 1rem;
+  padding: .8rem;
   justify-content: space-between;
   background: white;
   border-radius: 8px;
@@ -87,7 +90,7 @@ body {
 .book-list-page {
   /* margin: 0 auto; */
     width: 100%;
-    padding: 0;
+    padding: 0 1rem;
     height: fit-content;
 }
 
@@ -108,14 +111,18 @@ body {
   gap: 0.5rem;
   background: none;
   border: none;
-  outline: none;
   color: var(--primary-color);
   cursor: pointer;
   padding: 0;
-  font-weight: 700;
-  margin-bottom: 1rem;
+  font-weight: 600;
+  outline: none;
+  margin-bottom: .5rem;
   font-size: 2rem;
 }
+.arrow-left{
+  width: 1.3rem;
+}
+
 .search-icon {
   position: absolute;
   left: 10px;
@@ -136,10 +143,7 @@ body {
   font-size: 1rem;
 }
 
-.search-input:focus{
-  border: auto;
-  border-color: #5E56E7;
-}
+
 
 .clear-button {
   position: absolute;
@@ -170,6 +174,7 @@ body {
 
 .book-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(211, 209, 238, 0.5);
 }
 
 .book-cover {
@@ -183,6 +188,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  box-shadow: var(--card-shadow);
 }
 
 
@@ -210,7 +216,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  width: fit-content;
+  margin: 0 auto;
+  background-color: #c5c3c3;
+padding: .5rem;
+border-radius: 1rem;
+  gap: 2rem;
+  position: sticky;
+  bottom: 0;
 }
 
 .pagination button{
@@ -222,6 +235,15 @@ body {
   text-align: center;
   padding: 2rem;
   color: var(--primary-color);
+}
+
+.book-cover-image {
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+}
+
+.book-cover-image.loaded {
+  opacity: 1;
 }
 
 @media (max-width: 1024px) {
@@ -280,4 +302,11 @@ body {
   text-align: center;
   padding: 2rem;
   color: #718096;
+}
+
+.back-button:focus {
+  outline: none;
 } 
+.search-input:focus{
+  outline-color: #5E56E7;
+}

@@ -4,6 +4,7 @@ import { supabase } from '../utils/supabase';
 import SearchBar from '../components/SearchBar';
 import BookCard from '../components/BookCard';
 import arrowLeft from '../assets/images/Back.svg';
+import { handleZipFile } from '../utils/zipHandler';
 
 const BookListPage = () => {
   const { genre } = useParams();
@@ -16,6 +17,9 @@ const BookListPage = () => {
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
+  const [zipContent, setZipContent] = useState(null);
+  const [loadingZip, setLoadingZip] = useState(false);
+  const [zipError, setZipError] = useState(null);
 
   const fetchBooks = useCallback(async (pageNum) => {
     if (loading) return;
@@ -167,13 +171,28 @@ const BookListPage = () => {
       'text/html',
       'application/pdf',
       'text/plain; charset=utf-8',
-      'text/plain'
+      'text/plain',
+      'application/zip'
     ];
     
     const formats = book.formats || {};
     
     for (const format of preferredFormats) {
       if (formats[format]) {
+        if (format === 'application/zip') {
+          try {
+            setLoadingZip(true);
+            setZipError(null);
+            const contents = await handleZipFile(formats[format]);
+            setZipContent(contents);
+          } catch (err) {
+            setZipError('Error loading ZIP file');
+            console.error(err);
+          } finally {
+            setLoadingZip(false);
+          }
+          return;
+        }
         window.open(formats[format], '_blank');
         return;
       }
@@ -195,7 +214,8 @@ const BookListPage = () => {
           onClear={() => setSearch('')}
         />
       </div>
-      <div className="books-grid" onScroll={handleScroll}>
+      {loading && <div className="loading">Loading...</div>}
+      {!loading && <div className="books-grid" onScroll={handleScroll}>
         {error && <div className="error">{error}</div>}
         {books.length === 0 && !loading && !error && (
           <div className="no-books">No books found</div>
@@ -207,9 +227,38 @@ const BookListPage = () => {
             onBookClick={handleBookClick}
           />
         ))}
-      </div>
+      </div>}
 
-      <div className="pagination">
+      {zipContent && (
+        <div className="zip-viewer">
+          <div className="zip-viewer-content">
+            <button 
+              className="close-button"
+              onClick={() => setZipContent(null)}
+            >
+              Close
+            </button>
+            <h3>Book Contents</h3>
+            {zipContent.map((file, index) => (
+              <details key={index}>
+                <summary>{file.filename}</summary>
+                <pre className="file-content">
+                  {file.content.slice(0, 1000)}
+                  {file.content.length > 1000 && '...'}
+                </pre>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {loadingZip && (
+        <div className="loading-overlay">
+          Loading book contents...
+        </div>
+      )}
+
+       <div className="pagination">
         <button 
           onClick={handlePrevPage}
           disabled={page === 1 || loading}
@@ -229,7 +278,7 @@ const BookListPage = () => {
         </button>
       </div>
 
-      {loading && <div className="loading">Loading...</div>}
+      {/* {loading && <div className="loading">Loading...</div>} */}
     </div>
   );
 };
