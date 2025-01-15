@@ -72,6 +72,7 @@ const BookListPage = () => {
       query = query.range((pageNum - 1) * 32, pageNum * 32 - 1);
 
       const { data: rawData, count, error } = await query;
+      console.log(rawData);
 
       if (error) throw error;
 
@@ -158,12 +159,12 @@ const BookListPage = () => {
     }
   }, [booksCache]);
 
-  const handleScroll = useCallback((e) => {
-    const { scrollTop, clientHeight, scrollHeight } = e.target;
-    if (scrollHeight - scrollTop <= clientHeight * 1.5) {
-      setPage(prev => prev + 1);
-    }
-  }, []);
+  // const handleScroll = useCallback((e) => {
+  //   const { scrollTop, clientHeight, scrollHeight } = e.target;
+  //   if (scrollHeight - scrollTop <= clientHeight * 1.5) {
+  //     setPage(prev => prev + 1);
+  //   }
+  // }, []);
 
   const handleBookClick = async (book) => {
     // Check for viewable formats in order of preference
@@ -215,7 +216,7 @@ const BookListPage = () => {
         />
       </div>
       {loading && <div className="loading">Loading...</div>}
-      {!loading && <div className="books-grid" onScroll={handleScroll}>
+      {!loading && <div className="books-grid">
         {error && <div className="error">{error}</div>}
         {books.length === 0 && !loading && !error && (
           <div className="no-books">No books found</div>

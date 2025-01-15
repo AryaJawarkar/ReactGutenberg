@@ -1,9 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import yaml from '@rollup/plugin-yaml'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    yaml()
+  ],
   assetsInclude: ['**/*.svg'],
   base: '/ReactGutenberg/',
   define: {
@@ -18,13 +22,5 @@ export default defineConfig({
       }
     }
   },
-  server: {
-    proxy: {
-      '/api-docs': {
-        target: 'http://localhost:5173',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api-docs/, '')
-      }
-    }
-  }
+  
 })
