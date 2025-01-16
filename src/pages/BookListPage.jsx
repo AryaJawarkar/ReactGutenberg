@@ -5,7 +5,8 @@ import SearchBar from '../components/SearchBar';
 import BookCard from '../components/BookCard';
 import arrowLeft from '../assets/images/Back.svg';
 import { handleZipFile } from '../utils/zipHandler';
-
+import Sidebar from '../components/Sidebar';
+import Menu from '../assets/images/menu.svg';
 const BookListPage = () => {
   const { genre } = useParams();
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const BookListPage = () => {
   const [zipContent, setZipContent] = useState(null);
   const [loadingZip, setLoadingZip] = useState(false);
   const [zipError, setZipError] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const fetchBooks = useCallback(async (pageNum) => {
     if (loading) return;
@@ -203,83 +205,115 @@ const BookListPage = () => {
     alert('No viewable version available');
   };
 
+  // Close sidebar when clicking outside on mobile
+  const handleClickOutside = (e) => {
+    if (window.innerWidth <= 768 && 
+        !e.target.closest('.sidebar') && 
+        !e.target.closest('.sidebar-toggle')) {
+      setIsSidebarOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="book-list-page">
-      <div className="header-container">
-        <button className="back-button" onClick={() => navigate('/')}>
-          <img src={arrowLeft} alt="arrow-left" className='arrow-left' />{genre.charAt(0).toUpperCase() + genre.slice(1)}
-        </button>
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          onClear={() => setSearch('')}
-        />
+    <div className={`book-list-container ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+      {/* Toggle button - visible on both mobile and desktop */}
+      <button 
+        className="sidebar-toggle"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        aria-label="Toggle menu"
+      >
+        {/* {isSidebarOpen ? '←' : '→'} */}
+        <img src={Menu} alt="menu" className="menu-icon" />
+      </button>
+      
+      <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <Sidebar />
       </div>
-      {loading && <div className="loading">Loading...</div>}
-      {!loading && <div className="books-grid">
-        {error && <div className="error">{error}</div>}
-        {books.length === 0 && !loading && !error && (
-          <div className="no-books">No books found</div>
-        )}
-        {books.map((book) => (
-          <BookCard
-            key={book.id}
-            book={book}
-            onBookClick={handleBookClick}
+
+      <div className="book-list-page">
+        <div className="header-container">
+          <button className="back-button" onClick={() => navigate('/')}>
+            <img src={arrowLeft} alt="arrow-left" className='arrow-left' />{genre.charAt(0).toUpperCase() + genre.slice(1)}
+          </button>
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            onClear={() => setSearch('')}
           />
-        ))}
-      </div>}
+        </div>
+        {loading && <div className="loading">Loading...</div>}
+        {!loading && <div className="books-grid">
+          {error && <div className="error">{error}</div>}
+          {books.length === 0 && !loading && !error && (
+            <div className="no-books">No books found</div>
+          )}
+          {books.map((book) => (
+            <BookCard
+              key={book.id}
+              book={book}
+              onBookClick={handleBookClick}
+            />
+          ))}
+        </div>}
 
-      {zipContent && (
-        <div className="zip-viewer">
-          <div className="zip-viewer-content">
-            <button 
-              className="close-button"
-              onClick={() => setZipContent(null)}
-            >
-              Close
-            </button>
-            <h3>Book Contents</h3>
-            {zipContent.map((file, index) => (
-              <details key={index}>
-                <summary>{file.filename}</summary>
-                <pre className="file-content">
-                  {file.content.slice(0, 1000)}
-                  {file.content.length > 1000 && '...'}
-                </pre>
-              </details>
-            ))}
+        {zipContent && (
+          <div className="zip-viewer">
+            <div className="zip-viewer-content">
+              <button 
+                className="close-button"
+                onClick={() => setZipContent(null)}
+              >
+                Close
+              </button>
+              <h3>Book Contents</h3>
+              {zipContent.map((file, index) => (
+                <details key={index}>
+                  <summary>{file.filename}</summary>
+                  <pre className="file-content">
+                    {file.content.slice(0, 1000)}
+                    {file.content.length > 1000 && '...'}
+                  </pre>
+                </details>
+              ))}
+            </div>
           </div>
+        )}
+
+        {loadingZip && (
+          <div className="loading-overlay">
+            Loading book contents...
+          </div>
+        )}
+
+         <div className="pagination">
+          <button 
+            onClick={handlePrevPage}
+            disabled={page === 1 || loading}
+          >
+            Previous
+          </button>
+          
+          <span className="page-number">
+            Page {page} of {Math.ceil(totalCount / 32)}
+          </span>
+
+          <button 
+            onClick={handleNextPage}
+            disabled={!hasMore || loading}
+          >
+            Next
+          </button>
         </div>
-      )}
 
-      {loadingZip && (
-        <div className="loading-overlay">
-          Loading book contents...
-        </div>
-      )}
-
-       <div className="pagination">
-        <button 
-          onClick={handlePrevPage}
-          disabled={page === 1 || loading}
-        >
-          Previous
-        </button>
-        
-        <span className="page-number">
-          Page {page} of {Math.ceil(totalCount / 32)}
-        </span>
-
-        <button 
-          onClick={handleNextPage}
-          disabled={!hasMore || loading}
-        >
-          Next
-        </button>
+        {/* {loading && <div className="loading">Loading...</div>} */}
       </div>
-
-      {/* {loading && <div className="loading">Loading...</div>} */}
     </div>
   );
 };
